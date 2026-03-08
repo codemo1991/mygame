@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap');
+
+:root {
+  --bg-sketch: #f5f0e6;
+  --orbit-color: #2d2d2d;
+  --sun-color: #f5d76e;
+}
+
+body {
+  background: var(--bg-sketch);
+  font-family: 'Caveat', cursive;
+}
