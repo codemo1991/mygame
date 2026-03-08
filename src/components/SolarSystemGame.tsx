@@ -82,6 +82,7 @@ export default function SolarSystemGame() {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
   const [selectedIntro, setSelectedIntro] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const pauseTimeRef = useRef(0);
   const anglesRef = useRef<number[]>(PLANETS.map(() => Math.random() * Math.PI * 2));
   const halleyAngleRef = useRef(Math.PI * 0.3);
@@ -390,6 +391,11 @@ export default function SolarSystemGame() {
 
       if (clicked) {
         setSelectedPlanet(clicked.name);
+        // 切换天体时停止语音播放
+        if (typeof window !== "undefined" && "speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+          setIsSpeaking(false);
+        }
         if (isPaused && gameMode !== "quiz") {
           setSelectedIntro(CELESTIAL_INTROS[clicked.name] ?? null);
         } else {
@@ -430,20 +436,38 @@ export default function SolarSystemGame() {
               <button
                 onClick={() => {
                   if (typeof window !== "undefined" && "speechSynthesis" in window) {
-                    window.speechSynthesis.cancel();
-                    const u = new SpeechSynthesisUtterance(selectedIntro);
-                    u.lang = "zh-CN";
-                    u.rate = 0.9;
-                    window.speechSynthesis.speak(u);
+                    if (isSpeaking) {
+                      window.speechSynthesis.cancel();
+                      setIsSpeaking(false);
+                    } else {
+                      window.speechSynthesis.cancel();
+                      const u = new SpeechSynthesisUtterance(selectedIntro);
+                      u.lang = "zh-CN";
+                      u.rate = 0.9;
+                      u.onend = () => setIsSpeaking(false);
+                      u.onerror = () => setIsSpeaking(false);
+                      window.speechSynthesis.speak(u);
+                      setIsSpeaking(true);
+                    }
                   }
                 }}
-                className="pointer-events-auto shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-amber-100 hover:bg-amber-200 border border-amber-300 transition"
-                title="语音介绍"
+                className={`pointer-events-auto shrink-0 w-8 h-8 flex items-center justify-center rounded-full border transition ${
+                  isSpeaking 
+                    ? "bg-amber-300 border-amber-500" 
+                    : "bg-amber-100 hover:bg-amber-200 border-amber-300"
+                }`}
+                title={isSpeaking ? "暂停语音" : "语音介绍"}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-amber-700">
-                  <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06ZM18.584 5.106a.75.75 0 0 1 1.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 0 1-1.06-1.06 8.25 8.25 0 0 0 0-11.668.75.75 0 0 1 0-1.06Z" />
-                  <path d="M15.932 7.757a.75.75 0 0 1 1.061 0 6 6 0 0 1 0 8.486.75.75 0 0 1-1.06-1.061 4.5 4.5 0 0 0 0-6.364.75.75 0 0 1 0-1.06Z" />
-                </svg>
+                {isSpeaking ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-amber-700">
+                    <path fillRule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-amber-700">
+                    <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06ZM18.584 5.106a.75.75 0 0 1 1.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 0 1-1.06-1.06 8.25 8.25 0 0 0 0-11.668.75.75 0 0 1 0-1.06Z" />
+                    <path d="M15.932 7.757a.75.75 0 0 1 1.061 0 6 6 0 0 1 0 8.486.75.75 0 0 1-1.06-1.061 4.5 4.5 0 0 0 0-6.364.75.75 0 0 1 0-1.06Z" />
+                  </svg>
+                )}
               </button>
             </div>
           )}
@@ -451,48 +475,52 @@ export default function SolarSystemGame() {
             <p className="text-lg text-emerald-600 mt-1">{message}</p>
           )}
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => {
-              if (!isPaused) {
-                pauseTimeRef.current = Date.now() / 1000;
-                setIsPaused(true);
-              }
-            }}
-            className="pointer-events-auto px-4 py-2 bg-slate-100 border-2 border-slate-400 rounded-lg font-sketch font-bold text-slate-700 hover:bg-slate-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isPaused}
-          >
-            暂停
-          </button>
-          <button
-            onClick={() => {
-              setIsPaused(false);
-              setSelectedIntro(null);
-            }}
-            className="pointer-events-auto px-4 py-2 bg-emerald-100 border-2 border-emerald-500 rounded-lg font-sketch font-bold text-emerald-800 hover:bg-emerald-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!isPaused}
-          >
-            启动
-          </button>
-          <button
-            onClick={() => {
-              setGameMode("explore");
-              setQuizPlanet(null);
-              setMessage(null);
-            }}
-            className="pointer-events-auto px-4 py-2 bg-amber-100 border-2 border-amber-400 rounded-lg font-sketch font-bold text-amber-800 hover:bg-amber-200 transition"
-          >
-            自由探索
-          </button>
-          <button
-            onClick={startQuiz}
-            className="pointer-events-auto px-4 py-2 bg-emerald-100 border-2 border-emerald-500 rounded-lg font-sketch font-bold text-emerald-800 hover:bg-emerald-200 transition"
-          >
-            行星测验
-          </button>
-          <div className="bg-white/90 rounded-lg px-4 py-2 shadow border border-amber-200">
-            <span className="font-sketch font-bold text-amber-800">得分：</span>
-            <span className="font-sketch font-bold text-xl text-amber-600">{score}</span>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setGameMode("explore");
+                setQuizPlanet(null);
+                setMessage(null);
+              }}
+              className="pointer-events-auto px-4 py-2 bg-amber-100 border-2 border-amber-400 rounded-lg font-sketch font-bold text-amber-800 hover:bg-amber-200 transition"
+            >
+              自由探索
+            </button>
+            <button
+              onClick={startQuiz}
+              className="pointer-events-auto px-4 py-2 bg-emerald-100 border-2 border-emerald-500 rounded-lg font-sketch font-bold text-emerald-800 hover:bg-emerald-200 transition"
+            >
+              行星测验
+            </button>
+            <div className="bg-white/90 rounded-lg px-4 py-2 shadow border border-amber-200">
+              <span className="font-sketch font-bold text-amber-800">得分：</span>
+              <span className="font-sketch font-bold text-xl text-amber-600">{score}</span>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (!isPaused) {
+                  pauseTimeRef.current = Date.now() / 1000;
+                  setIsPaused(true);
+                }
+              }}
+              className="pointer-events-auto px-4 py-2 bg-slate-100 border-2 border-slate-400 rounded-lg font-sketch font-bold text-slate-700 hover:bg-slate-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isPaused}
+            >
+              暂停
+            </button>
+            <button
+              onClick={() => {
+                setIsPaused(false);
+                setSelectedIntro(null);
+              }}
+              className="pointer-events-auto px-4 py-2 bg-emerald-100 border-2 border-emerald-500 rounded-lg font-sketch font-bold text-emerald-800 hover:bg-emerald-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!isPaused}
+            >
+              启动
+            </button>
           </div>
         </div>
       </div>
