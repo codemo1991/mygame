@@ -451,48 +451,52 @@ export default function SolarSystemGame() {
             <p className="text-lg text-emerald-600 mt-1">{message}</p>
           )}
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => {
-              if (!isPaused) {
-                pauseTimeRef.current = Date.now() / 1000;
-                setIsPaused(true);
-              }
-            }}
-            className="pointer-events-auto px-4 py-2 bg-slate-100 border-2 border-slate-400 rounded-lg font-sketch font-bold text-slate-700 hover:bg-slate-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isPaused}
-          >
-            暂停
-          </button>
-          <button
-            onClick={() => {
-              setIsPaused(false);
-              setSelectedIntro(null);
-            }}
-            className="pointer-events-auto px-4 py-2 bg-emerald-100 border-2 border-emerald-500 rounded-lg font-sketch font-bold text-emerald-800 hover:bg-emerald-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!isPaused}
-          >
-            启动
-          </button>
-          <button
-            onClick={() => {
-              setGameMode("explore");
-              setQuizPlanet(null);
-              setMessage(null);
-            }}
-            className="pointer-events-auto px-4 py-2 bg-amber-100 border-2 border-amber-400 rounded-lg font-sketch font-bold text-amber-800 hover:bg-amber-200 transition"
-          >
-            自由探索
-          </button>
-          <button
-            onClick={startQuiz}
-            className="pointer-events-auto px-4 py-2 bg-emerald-100 border-2 border-emerald-500 rounded-lg font-sketch font-bold text-emerald-800 hover:bg-emerald-200 transition"
-          >
-            行星测验
-          </button>
-          <div className="bg-white/90 rounded-lg px-4 py-2 shadow border border-amber-200">
-            <span className="font-sketch font-bold text-amber-800">得分：</span>
-            <span className="font-sketch font-bold text-xl text-amber-600">{score}</span>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setGameMode("explore");
+                setQuizPlanet(null);
+                setMessage(null);
+              }}
+              className="pointer-events-auto px-4 py-2 bg-amber-100 border-2 border-amber-400 rounded-lg font-sketch font-bold text-amber-800 hover:bg-amber-200 transition"
+            >
+              自由探索
+            </button>
+            <button
+              onClick={startQuiz}
+              className="pointer-events-auto px-4 py-2 bg-emerald-100 border-2 border-emerald-500 rounded-lg font-sketch font-bold text-emerald-800 hover:bg-emerald-200 transition"
+            >
+              行星测验
+            </button>
+            <div className="bg-white/90 rounded-lg px-4 py-2 shadow border border-amber-200">
+              <span className="font-sketch font-bold text-amber-800">得分：</span>
+              <span className="font-sketch font-bold text-xl text-amber-600">{score}</span>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (!isPaused) {
+                  pauseTimeRef.current = Date.now() / 1000;
+                  setIsPaused(true);
+                }
+              }}
+              className="pointer-events-auto px-4 py-2 bg-slate-100 border-2 border-slate-400 rounded-lg font-sketch font-bold text-slate-700 hover:bg-slate-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isPaused}
+            >
+              暂停
+            </button>
+            <button
+              onClick={() => {
+                setIsPaused(false);
+                setSelectedIntro(null);
+              }}
+              className="pointer-events-auto px-4 py-2 bg-emerald-100 border-2 border-emerald-500 rounded-lg font-sketch font-bold text-emerald-800 hover:bg-emerald-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!isPaused}
+            >
+              启动
+            </button>
           </div>
         </div>
       </div>
